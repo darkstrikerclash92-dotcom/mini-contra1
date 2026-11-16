@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -64,6 +64,10 @@ jobs:
               test -s mini-contra-dos.pkg
               test -s build/pkg/USRDIR/EBOOT.BIN
               test -s build/pkg/PARAM.SFO
+              echo "=== Inspect package directory table ==="
+              pkg --list mini-contra-dos.pkg | tee build/pkg-list.txt
+              grep -q "EBOOT.BIN" build/pkg-list.txt
+              grep -q "PARAM.SFO" build/pkg-list.txt
               ls -lh mini-contra-dos.elf mini-contra-dos.self mini-contra-dos.pkg
               ls -lh build/pkg/USRDIR/EBOOT.BIN build/pkg/PARAM.SFO
               echo "BUILD_AND_PACKAGE_VALIDATION=PASS"
@@ -80,3 +84,14 @@ jobs:
             mini-contra-dos.pkg
             build/pkg/PARAM.SFO
             build/pkg/USRDIR/EBOOT.BIN
+            build/pkg-list.txt
+
+      - name: Publish installable PKG release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mini-contra-dos-build-${{ github.run_number }}
+          name: Mini Contra Dos build ${{ github.run_number }}
+          prerelease: true
+          files: |
+            mini-contra-dos.pkg
+            mini-contra-dos.self
