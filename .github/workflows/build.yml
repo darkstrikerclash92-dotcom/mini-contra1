@@ -50,7 +50,7 @@ jobs:
 
               echo "=== Clean build ==="
               make clean
-              make -j2
+              make LD=ppu-gcc -j2
 
               echo "=== Verify ELF and SELF ==="
               test -s mini-contra-dos.elf
@@ -58,7 +58,7 @@ jobs:
               file mini-contra-dos.elf mini-contra-dos.self || true
 
               echo "=== Create installable package ==="
-              make pkg
+              make pkg LD=ppu-gcc
 
               echo "=== Verify package and staged contents ==="
               test -s mini-contra-dos.pkg
