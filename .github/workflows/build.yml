@@ -1,0 +1,75 @@
+name: Mini Contra Dos - PS3 build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Inspect PS3DEV toolchain and build ELF SELF PKG
+        run: |
+          set -eux
+          docker pull ghcr.io/altps3/ps3dev:latest
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            ghcr.io/altps3/ps3dev:latest \
+            sh -euxc '
+              export PS3DEV="${PS3DEV:-/usr/local/ps3dev}"
+              export PSL1GHT="${PSL1GHT:-$PS3DEV}"
+              export PATH="$PS3DEV/bin:$PS3DEV/ppu/bin:$PS3DEV/spu/bin:$PATH"
+
+              echo "=== SDK paths ==="
+              test -d "$PSL1GHT/ppu/include"
+              test -f "$PSL1GHT/ppu_rules"
+              echo "PS3DEV=$PS3DEV"
+              echo "PSL1GHT=$PSL1GHT"
+
+              echo "=== Required toolchain commands ==="
+              for tool in ppu-gcc make make_self_npdrm fself pkg sfo package_finalize; do
+                command -v "$tool"
+              done
+              ppu-gcc --version
+
+              echo "=== Clean build ==="
+              make clean
+              make -j2
+
+              echo "=== Verify ELF and SELF ==="
+              test -s mini-contra-dos.elf
+              test -s mini-contra-dos.self
+              file mini-contra-dos.elf mini-contra-dos.self || true
+
+              echo "=== Create installable package ==="
+              make pkg
+
+              echo "=== Verify package and staged contents ==="
+              test -s mini-contra-dos.pkg
+              test -s build/pkg/USRDIR/EBOOT.BIN
+              test -s build/pkg/PARAM.SFO
+              ls -lh mini-contra-dos.elf mini-contra-dos.self mini-contra-dos.pkg
+              ls -lh build/pkg/USRDIR/EBOOT.BIN build/pkg/PARAM.SFO
+              echo "BUILD_AND_PACKAGE_VALIDATION=PASS"
+            '
+
+      - name: Upload ELF SELF PKG and package contents
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mini-Contra-Dos-PS3
+          if-no-files-found: error
+          path: |
+            mini-contra-dos.elf
+            mini-contra-dos.self
+            mini-contra-dos.pkg
+            build/pkg/PARAM.SFO
+            build/pkg/USRDIR/EBOOT.BIN
