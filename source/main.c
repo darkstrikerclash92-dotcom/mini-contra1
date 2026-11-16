@@ -499,7 +499,8 @@ int main(int argc, char **argv)
 
     printf("[GAME] Main loop started. D-pad move, CROSS jump, SQUARE fire.\n");
     while (g_running) {
-        u32 *draw_buffer = g_framebuffer[g_front ^ 1u];
+        /* Render into the buffer that this frame will present, then swap. */
+        u32 *draw_buffer = g_framebuffer[g_front];
         if (ioPadGetInfo(&pad_info) == 0 && pad_info.status[0]) {
             memset(&pad_update, 0, sizeof(pad_update));
             if (ioPadGetData(0, &pad_update) == 0 && pad_update.len > 0)
