@@ -35,6 +35,13 @@ jobs:
               echo "PS3DEV=$PS3DEV"
               echo "PSL1GHT=$PSL1GHT"
 
+              echo "=== Build official PSL1GHT package utilities ==="
+              git clone --depth 1 https://github.com/ps3dev/PSL1GHT.git /tmp/psl1ght-tools
+              make -C /tmp/psl1ght-tools/tools/sfo_pkg
+              install -m 755 /tmp/psl1ght-tools/tools/sfo_pkg/pkg "$PS3DEV/bin/pkg"
+              install -m 755 /tmp/psl1ght-tools/tools/sfo_pkg/sfo "$PS3DEV/bin/sfo"
+              install -m 644 /tmp/psl1ght-tools/tools/sfo_pkg/ICON0.PNG "$PS3DEV/bin/ICON0.PNG"
+
               echo "=== Required toolchain commands ==="
               for tool in ppu-gcc make make_self_npdrm fself pkg sfo package_finalize; do
                 command -v "$tool"
