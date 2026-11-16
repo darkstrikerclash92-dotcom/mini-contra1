@@ -43,7 +43,7 @@ jobs:
               install -m 644 /tmp/psl1ght-tools/tools/sfo_pkg/ICON0.PNG "$PS3DEV/bin/ICON0.PNG"
 
               echo "=== Required toolchain commands ==="
-              for tool in ppu-gcc make make_self_npdrm fself pkg sfo package_finalize; do
+              for tool in ppu-gcc make make_self make_self_npdrm sprxlinker fself pkg sfo package_finalize; do
                 command -v "$tool"
               done
               ppu-gcc --version
