@@ -477,6 +477,7 @@ int main(int argc, char **argv)
 {
     padInfo pad_info;
     padData pad;
+    padData pad_update;
     (void)argc;
     (void)argv;
 
@@ -493,15 +494,18 @@ int main(int argc, char **argv)
     reset_game();
     memset(&pad_info, 0, sizeof(pad_info));
     memset(&pad, 0, sizeof(pad));
+    memset(&pad_update, 0, sizeof(pad_update));
     sysUtilRegisterCallback(0, system_callback, NULL);
 
     printf("[GAME] Main loop started. D-pad move, CROSS jump, SQUARE fire.\n");
     while (g_running) {
         u32 *draw_buffer = g_framebuffer[g_front ^ 1u];
-        memset(&pad, 0, sizeof(pad));
         if (ioPadGetInfo(&pad_info) == 0 && pad_info.status[0]) {
-            ioPadGetData(0, &pad);
+            memset(&pad_update, 0, sizeof(pad_update));
+            if (ioPadGetData(0, &pad_update) == 0 && pad_update.len > 0)
+                pad = pad_update;
         } else {
+            memset(&pad, 0, sizeof(pad));
         }
         sysUtilCheckCallback();
         update_game(&pad);
