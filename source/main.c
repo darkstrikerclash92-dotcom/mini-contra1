@@ -259,8 +259,6 @@ static void draw_background(u32 *fb)
 {
     int y;
     int floor_y = (int)g_height - 78;
-    u32 sky_top = COLOR(9, 17, 42);
-    u32 sky_bottom = COLOR(34, 54, 78);
     for (y = 0; y < floor_y; ++y) {
         unsigned int t = (unsigned int)y * 255u / (unsigned int)(floor_y ? floor_y : 1);
         unsigned int r = 9u + (25u * t) / 255u;
@@ -269,7 +267,6 @@ static void draw_background(u32 *fb)
         u32 color = COLOR(r, g, b);
         u32 *line = fb + (u32)y * g_width;
         unsigned int x;
-        (void)sky_top; (void)sky_bottom;
         for (x = 0; x < g_width; ++x) line[x] = color;
     }
 
@@ -480,7 +477,6 @@ int main(int argc, char **argv)
 {
     padInfo pad_info;
     padData pad;
-    unsigned int idle_frames = 0;
     (void)argc;
     (void)argv;
 
@@ -505,9 +501,7 @@ int main(int argc, char **argv)
         memset(&pad, 0, sizeof(pad));
         if (ioPadGetInfo(&pad_info) == 0 && pad_info.status[0]) {
             ioPadGetData(0, &pad);
-            idle_frames = 0;
         } else {
-            ++idle_frames;
         }
         sysUtilCheckCallback();
         update_game(&pad);
